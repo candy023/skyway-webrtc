@@ -1,13 +1,11 @@
 <script setup>
-import HelloWorld from './components/HelloWorld.vue'
+import StreamReceiver from './components/StreamReceiver.vue'
 </script>
 
 <template>
-  <div class="p-6 bg-gray-100 text-center">
-    <h1 class="text-3xl font-bold text-indigo-600">Hello Tailwind!</h1>
-    <p class="mt-2 text-gray-700">SkyWay + Vue + Tailwind の世界へようこそ</p>
-  </div>
+  <StreamReceiver  />
 </template>
+
 
 
 <style scoped>

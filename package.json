@@ -9,7 +9,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@skyway-sdk/room": "^1.15.0",
     "@tailwindcss/vite": "^4.1.11",
+    "skyway-js": "^4.4.5",
     "tailwindcss": "^4.1.11",
     "vue": "^3.5.18"
   },
