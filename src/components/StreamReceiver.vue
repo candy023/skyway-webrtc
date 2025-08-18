@@ -8,6 +8,7 @@ const tokenString = GetToken(import.meta.env.VITE_SKYWAY_APP_ID, import.meta.env
 
 // SkyWayの実体とルームの実体を保管するため
 const context = {'ctx': null, 'room': null};
+let member = null // 自分の member
 
 // 現在のURL
 const baseUrl = window.location.href.split('?')[0];
@@ -37,10 +38,10 @@ const createRoom = async () => {
         RoomId.value = uuidV4();
     }
 
-    // ルームの実体を作成する, p2pの手法
+    // ルームの実体を作成する, (SFU)に変更
     // FindOrCreateは同じ名前のルームがある場合はそれを使う
     context.room = await SkyWayRoom.FindOrCreate(context.ctx, {
-        type: 'p2p',
+        type: 'sfu',
         name: RoomId.value,
     });
     // ルームを作ったことを示すため
@@ -62,31 +63,57 @@ const joinRoom = async () => {
     // ルームに入る, 今は名前はランダム、同じ名前だと入らないので、現在テストため
     const member = await context.room.join({name: uuidV4()});
     // Cameraのストリームを作成する
-    const videoStream = await SkyWayStreamFactory.createCameraVideoStream();
+    //const videoStream = await SkyWayStreamFactory.createCameraVideoStream();
 
     // 映像を送る
-    await member.publish(videoStream);
+    //await member.publish(videoStream);
 
     // ユーザーからCameraの映像を取得する
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    const { audio, video } = await SkyWayStreamFactory.createMicrophoneAudioAndCameraStream()
 
+   // 正しい publish（MediaStream ではなく LocalStream オブジェクト）
+    await member.publish(audio)
+    await member.publish(video)
     // 映像を表示する
-    const video = document.createElement('video');
-    video.srcObject = stream;
-    video.autoplay = true;
-    video.playsInline = true;
-    video.muted = true;
-    video.style.width = '100%';
-    video.style.height = '100%';
-    StreamArea.value.appendChild(video);
+    const videoEl = document.createElement('video')
+    //videoEl.srcObject = video;
+    videoEl.autoplay = true;
+    videoEl.playsInline = true;
+    videoEl.muted = true;  // 自分の声がループしないように
+    videoEl.style.width = '100%';
+    videoEl.style.height = '100%';
+    StreamArea.value.appendChild(videoEl);
 
-    // skywayのストリームへ添付する
-    skywayStream.attach(video);
-    
+   // LocalVideoStream の attach を使う
+    video.attach(videoEl);
+
+    StreamArea.value.appendChild(videoEl);
     // 映像を再生する
-    await video.play();
-}
+    await videoEl.play();
 
+// ====== ここがステップ2：既存 publication を subscribe ====== (Joinroomないで行う)
+    for (const pub of context.room.publications) {
+    // 自分自身の publication は無視
+    if (pub.publisher.id === member.id) continue
+    try {
+        const { stream } = await member.subscribe(pub.id)
+        if (stream.track.kind === 'video') {
+        const remoteVideo = document.createElement('video')
+        remoteVideo.autoplay = true
+        remoteVideo.playsInline = true
+        stream.attach(remoteVideo)
+        StreamArea.value.appendChild(remoteVideo)
+        } else if (stream.track.kind === 'audio') {
+        const remoteAudio = document.createElement('audio')
+        remoteAudio.autoplay = true
+        stream.attach(remoteAudio)
+        StreamArea.value.appendChild(remoteAudio)
+        }
+    } catch (e) {
+        console.error('subscribe 失敗', pub, e)
+    }
+    }
+}
 // ページが読み込まれたら SkyWayの実体を作成する
 onMounted(async () => {
     await getContext();
