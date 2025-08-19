@@ -10,14 +10,16 @@
   },
   "dependencies": {
     "@skyway-sdk/room": "^1.15.0",
+    "@skyway-sdk/token": "^1.15.0",
     "@supabase/supabase-js": "^2.55.0",
-    "@tailwindcss/vite": "^4.1.11",
-    "skyway-js": "^4.4.5",
-    "tailwindcss": "^4.1.11",
+    "@tailwindcss/vite": "^0.1.0",
+    "tailwindcss": "^3.4.10",
     "vue": "^3.5.18"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.1",
-    "vite": "^7.1.0"
+    "vite": "^7.1.0",
+    "typescript": "^5.5.4",
+    "vue-tsc": "^2.0.26"
   }
 }
