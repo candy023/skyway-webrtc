@@ -1,28 +1,13 @@
-const LOCAL = import.meta.env.DEV;
-const PROJECT_ID = import.meta.env.VITE_FIREBASE_PROJECT_ID; // .env に書いておく
-const REGION = 'asia-northeast1';
-
-// ローカルエミュレータ用 URL
-function getEndpoint() {
-  if (LOCAL) {
-    return `http://127.0.0.1:5001/${PROJECT_ID}/${REGION}/skywayToken`;
-  }
-  // デプロイ後に本番 URL を .env に用意
-  return import.meta.env.VITE_SKYWAY_TOKEN_ENDPOINT;
-}
-
-export async function getSkyWayToken(roomName) {
-  const res = await fetch(getEndpoint(), {
+export async function getSkyWayToken(roomName, userName) {
+  const res = await fetch(import.meta.env.VITE_TOKEN_ENDPOINT, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ roomName })
+    headers: { 'Content-Type':'application/json' },
+    body: JSON.stringify({ roomName, userName })
   });
   if (!res.ok) {
-    const t = await res.text();
-    throw new Error(`skywayToken HTTP ${res.status}: ${t}`);
+    let text;
+    try { text = await res.text(); } catch { text = res.statusText; }
+    throw new Error('Token fetch failed: ' + text);
   }
-  const json = await res.json();
-  if (!json.token) throw new Error('token missing');
-  console.log('[skywayToken] len=', json.token.length);
-  return json;
+  return res.json(); // { token, roomName, userName, exp ... }
 }
