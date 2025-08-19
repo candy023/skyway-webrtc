@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@skyway-sdk/room": "^1.15.0",
+    "@supabase/supabase-js": "^2.55.0",
     "@tailwindcss/vite": "^4.1.11",
     "skyway-js": "^4.4.5",
     "tailwindcss": "^4.1.11",
